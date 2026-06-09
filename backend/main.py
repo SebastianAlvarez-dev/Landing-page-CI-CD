@@ -1,19 +1,25 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
-class RegistroRequest(BaseModel):
+class Jugador(BaseModel):
     nombre: str
-    correo: EmailStr
-    telefono: str
+    posicion: str
+    dorsal: int
 
 
 app = FastAPI(
-    title="Landing Page Backend",
-    description="Backend independiente para recibir datos desde la landing page.",
+    title="Club ULEAM Backend",
+    description="Backend para gestionar jugadores del Club ULEAM.",
     version="1.0.0",
 )
+
+db_jugadores = [
+    {"nombre": "Juan Perez", "posicion": "Portero", "dorsal": 1},
+    {"nombre": "Carlos Vera", "posicion": "Defensa", "dorsal": 4},
+    {"nombre": "Mauro Lucas", "posicion": "Mediocampista", "dorsal": 8},
+]
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,19 +33,21 @@ app.add_middleware(
 @app.get("/")
 def inicio():
     return {
-        "mensaje": "Backend FastAPI activo y listo para recibir peticiones.",
+        "mensaje": "Backend FastAPI del Club ULEAM activo.",
         "estado": "ok",
     }
 
 
-@app.post("/registro")
-def registrar_datos(datos: RegistroRequest):
+@app.get("/jugadores")
+def obtener_jugadores():
+    return db_jugadores
+
+
+@app.post("/jugadores")
+def crear_jugador(jugador: Jugador):
+    db_jugadores.append(jugador.model_dump())
     return {
-        "mensaje": "Registro recibido correctamente.",
+        "mensaje": "Jugador agregado correctamente.",
         "estado": "success",
-        "datos": {
-            "nombre": datos.nombre,
-            "correo": datos.correo,
-            "telefono": datos.telefono,
-        },
+        "jugador": jugador,
     }
