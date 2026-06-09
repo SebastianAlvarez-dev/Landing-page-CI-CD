@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -50,4 +50,23 @@ def crear_jugador(jugador: Jugador):
         "mensaje": "Jugador agregado correctamente.",
         "estado": "success",
         "jugador": jugador,
+    }
+
+
+@app.delete("/jugadores/{dorsal}")
+def eliminar_jugador(dorsal: int):
+    global db_jugadores
+
+    jugador_existe = any(jugador["dorsal"] == dorsal for jugador in db_jugadores)
+
+    if not jugador_existe:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado.")
+
+    db_jugadores = [
+        jugador for jugador in db_jugadores if jugador["dorsal"] != dorsal
+    ]
+
+    return {
+        "mensaje": f"Jugador con dorsal {dorsal} eliminado correctamente.",
+        "estado": "success",
     }

@@ -424,7 +424,7 @@ body{
   margin-right:10px;
 }
 
-.registro-form{
+.jugador-form{
   display:grid;
   gap:10px;
   margin-top:22px;
@@ -432,18 +432,19 @@ body{
   border-top:1px solid rgba(255,255,255,.18);
 }
 
-.registro-form h3{
+.jugador-form h3{
   margin-bottom:4px;
   font-size:1rem;
 }
 
-.registro-form label{
+.jugador-form label{
   font-size:.78rem;
   font-weight:800;
   opacity:.85;
 }
 
-.registro-form input{
+.jugador-form input,
+.jugador-form select{
   width:100%;
   padding:12px;
   color:#fff;
@@ -453,16 +454,21 @@ body{
   outline:none;
 }
 
-.registro-form input:focus{
+.jugador-form input:focus,
+.jugador-form select:focus{
   border-color:#ffdd00;
   box-shadow:0 0 0 3px rgba(255,221,0,.14);
 }
 
-.registro-form input::placeholder{
+.jugador-form select option{
+  color:#111;
+}
+
+.jugador-form input::placeholder{
   color:rgba(255,255,255,.55);
 }
 
-.registro-form button{
+.jugador-form button{
   margin-top:6px;
   padding:12px;
   color:#fff;
@@ -473,22 +479,72 @@ body{
   font-weight:900;
 }
 
-.registro-form button:hover{
+.jugador-form button:hover{
   filter:brightness(1.08);
 }
 
-.registro-mensaje{
+.jugador-mensaje{
   min-height:18px;
   font-size:.82rem;
   opacity:.88;
 }
 
-.registro-mensaje.success{
+.jugador-mensaje.success{
   color:#6dff8d;
 }
 
-.registro-mensaje.error{
+.jugador-mensaje.error{
   color:#ff8a8a;
+}
+
+.plantilla-table-wrap{
+  margin-top:22px;
+  overflow-x:auto;
+}
+
+.plantilla-table-wrap h3{
+  margin-bottom:12px;
+  font-size:1rem;
+  text-align:center;
+}
+
+.plantilla-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:.84rem;
+}
+
+.plantilla-table th,
+.plantilla-table td{
+  padding:10px 8px;
+  text-align:left;
+  border-bottom:1px solid rgba(255,255,255,.14);
+}
+
+.plantilla-table th{
+  color:#ffdd00;
+  font-size:.74rem;
+  text-transform:uppercase;
+}
+
+.plantilla-table td:last-child,
+.plantilla-table th:last-child{
+  text-align:center;
+}
+
+.delete-player-btn{
+  width:32px;
+  height:32px;
+  color:#fff;
+  background:#bd0f2c;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:900;
+}
+
+.delete-player-btn:hover{
+  background:#e50930;
 }
 
 @media(max-width:1000px){
