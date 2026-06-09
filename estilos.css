@@ -119,7 +119,7 @@ body{
 .divider{
   width:1px;
   height:70px;
-  background:rgba(255,255,255,.25);
+  background:rgba(255, 255, 255, 0.25);
 }
 
 .layout{
@@ -422,6 +422,73 @@ body{
   color:#ffdd00;
   font-size:1.45rem;
   margin-right:10px;
+}
+
+.registro-form{
+  display:grid;
+  gap:10px;
+  margin-top:22px;
+  padding-top:20px;
+  border-top:1px solid rgba(255,255,255,.18);
+}
+
+.registro-form h3{
+  margin-bottom:4px;
+  font-size:1rem;
+}
+
+.registro-form label{
+  font-size:.78rem;
+  font-weight:800;
+  opacity:.85;
+}
+
+.registro-form input{
+  width:100%;
+  padding:12px;
+  color:#fff;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:8px;
+  outline:none;
+}
+
+.registro-form input:focus{
+  border-color:#ffdd00;
+  box-shadow:0 0 0 3px rgba(255,221,0,.14);
+}
+
+.registro-form input::placeholder{
+  color:rgba(255,255,255,.55);
+}
+
+.registro-form button{
+  margin-top:6px;
+  padding:12px;
+  color:#fff;
+  background:linear-gradient(180deg,#e50930,#9e0823);
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:900;
+}
+
+.registro-form button:hover{
+  filter:brightness(1.08);
+}
+
+.registro-mensaje{
+  min-height:18px;
+  font-size:.82rem;
+  opacity:.88;
+}
+
+.registro-mensaje.success{
+  color:#6dff8d;
+}
+
+.registro-mensaje.error{
+  color:#ff8a8a;
 }
 
 @media(max-width:1000px){
