@@ -1,22 +1,23 @@
-name: Deploy Backend to AWS App Runner
+name: Deploy Backend to AWS Elastic Beanstalk
 
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - "backend/**"
       - ".github/workflows/aws-deploy.yml"
   workflow_dispatch:
 
 env:
-  AWS_REGION: us-east-1
-  ECR_REPOSITORY: landing-page-backend
-  APP_RUNNER_SERVICE_NAME: landing-page-backend-service
+  AWS_REGION: us-east-2
+  EB_APPLICATION_NAME: club-uleam-backend
+  EB_ENVIRONMENT_NAME: club-uleam-backend-env
+  EB_S3_BUCKET: elasticbeanstalk-us-east-2-144273780794
 
 jobs:
   deploy:
-    name: Build and deploy backend
+    name: Package and deploy backend
     runs-on: ubuntu-latest
 
     permissions:
@@ -33,41 +34,30 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Create ECR repository if it does not exist
+      - name: Package backend
         run: |
-          aws ecr describe-repositories --repository-names "$ECR_REPOSITORY" >/dev/null 2>&1 || \
-          aws ecr create-repository --repository-name "$ECR_REPOSITORY"
+          cd backend
+          zip -r "../backend-${GITHUB_SHA}.zip" Dockerfile main.py requirements.txt
 
-      - name: Build, tag, and push Docker image
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
+      - name: Upload package to S3
         run: |
-          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" ./backend
-          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          aws s3 cp "backend-${GITHUB_SHA}.zip" "s3://${EB_S3_BUCKET}/backend-${GITHUB_SHA}.zip"
 
-      - name: Create App Runner service if it does not exist
-        env:
-          IMAGE_URI: ${{ steps.build-image.outputs.image }}
-          APP_RUNNER_ACCESS_ROLE_ARN: ${{ secrets.APP_RUNNER_ACCESS_ROLE_ARN }}
+      - name: Create Elastic Beanstalk application version
         run: |
-          SERVICE_ARN=$(aws apprunner list-services \
-            --query "ServiceSummaryList[?ServiceName=='$APP_RUNNER_SERVICE_NAME'].ServiceArn | [0]" \
-            --output text)
+          aws elasticbeanstalk create-application-version \
+            --application-name "${EB_APPLICATION_NAME}" \
+            --version-label "backend-${GITHUB_SHA}" \
+            --source-bundle S3Bucket="${EB_S3_BUCKET}",S3Key="backend-${GITHUB_SHA}.zip"
 
-          if [ "$SERVICE_ARN" = "None" ] || [ -z "$SERVICE_ARN" ]; then
-            aws apprunner create-service \
-              --service-name "$APP_RUNNER_SERVICE_NAME" \
-              --source-configuration "ImageRepository={ImageIdentifier=$IMAGE_URI,ImageRepositoryType=ECR,ImageConfiguration={Port=8000}},AuthenticationConfiguration={AccessRoleArn=$APP_RUNNER_ACCESS_ROLE_ARN}" \
-              --instance-configuration "Cpu=1 vCPU,Memory=2 GB"
-          else
-            aws apprunner update-service \
-              --service-arn "$SERVICE_ARN" \
-              --source-configuration "ImageRepository={ImageIdentifier=$IMAGE_URI,ImageRepositoryType=ECR,ImageConfiguration={Port=8000}},AuthenticationConfiguration={AccessRoleArn=$APP_RUNNER_ACCESS_ROLE_ARN}"
-          fi
+      - name: Deploy to Elastic Beanstalk environment
+        run: |
+          aws elasticbeanstalk update-environment \
+            --environment-name "${EB_ENVIRONMENT_NAME}" \
+            --version-label "backend-${GITHUB_SHA}"
+
+      - name: Wait for environment update
+        run: |
+          aws elasticbeanstalk wait environment-updated \
+            --application-name "${EB_APPLICATION_NAME}" \
+            --environment-names "${EB_ENVIRONMENT_NAME}"
