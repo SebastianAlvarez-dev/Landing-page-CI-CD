@@ -37,6 +37,10 @@ def obtener_cliente_supabase() -> Client:
             detail="Faltan las variables de entorno SUPABASE_URL y SUPABASE_KEY.",
         )
 
+    supabase_url = supabase_url.rstrip("/")
+    if supabase_url.endswith("/rest/v1"):
+        supabase_url = supabase_url.removesuffix("/rest/v1")
+
     return create_client(supabase_url, supabase_key)
 
 
