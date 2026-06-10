@@ -3,7 +3,6 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from postgrest.exceptions import APIError
 from supabase import Client, create_client
 
 
@@ -41,10 +40,10 @@ def obtener_cliente_supabase() -> Client:
     return create_client(supabase_url, supabase_key)
 
 
-def manejar_error_supabase(error: APIError):
+def manejar_error_supabase(error: Exception):
     raise HTTPException(
         status_code=500,
-        detail=f"Error consultando Supabase: {error.message}",
+        detail=f"Error consultando Supabase: {str(error)}",
     )
 
 
@@ -54,6 +53,7 @@ def inicio():
         "mensaje": "Backend FastAPI del Club ULEAM activo con Supabase.",
         "estado": "ok",
         "base_datos": "supabase",
+        "supabase_configurado": bool(os.getenv("SUPABASE_URL") and os.getenv("SUPABASE_KEY")),
     }
 
 
@@ -67,7 +67,7 @@ def obtener_jugadores():
             .order("dorsal")
             .execute()
         )
-    except APIError as error:
+    except Exception as error:
         manejar_error_supabase(error)
 
     return respuesta.data
@@ -84,7 +84,7 @@ def crear_jugador(jugador: Jugador):
             .eq("dorsal", jugador.dorsal)
             .execute()
         )
-    except APIError as error:
+    except Exception as error:
         manejar_error_supabase(error)
 
     if jugador_existente.data:
@@ -99,7 +99,7 @@ def crear_jugador(jugador: Jugador):
             .insert(jugador.model_dump())
             .execute()
         )
-    except APIError as error:
+    except Exception as error:
         manejar_error_supabase(error)
 
     return {
@@ -120,7 +120,7 @@ def eliminar_jugador(dorsal: int):
             .eq("dorsal", dorsal)
             .execute()
         )
-    except APIError as error:
+    except Exception as error:
         manejar_error_supabase(error)
 
     if not jugador_existente.data:
@@ -128,7 +128,7 @@ def eliminar_jugador(dorsal: int):
 
     try:
         supabase.table("jugadores").delete().eq("dorsal", dorsal).execute()
-    except APIError as error:
+    except Exception as error:
         manejar_error_supabase(error)
 
     return {
