@@ -51,10 +51,16 @@ jobs:
             --source-bundle S3Bucket="${EB_S3_BUCKET}",S3Key="backend-${GITHUB_SHA}.zip"
 
       - name: Deploy to Elastic Beanstalk environment
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           aws elasticbeanstalk update-environment \
             --environment-name "${EB_ENVIRONMENT_NAME}" \
-            --version-label "backend-${GITHUB_SHA}"
+            --version-label "backend-${GITHUB_SHA}" \
+            --option-settings \
+              Namespace=aws:elasticbeanstalk:application:environment,OptionName=SUPABASE_URL,Value="${SUPABASE_URL}" \
+              Namespace=aws:elasticbeanstalk:application:environment,OptionName=SUPABASE_KEY,Value="${SUPABASE_KEY}"
 
       - name: Wait for environment update
         run: |
