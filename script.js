@@ -1,4 +1,4 @@
-const API_JUGADORES_URL = "http://club-uleam-backend-env.eba-ta2ibwhg.us-east-2.elasticbeanstalk.com/jugadores";
+const API_JUGADORES_URL = "/api/jugadores";
 
 const jugadorForm = document.getElementById("jugadorForm");
 const jugadorMensaje = document.getElementById("jugadorMensaje");
