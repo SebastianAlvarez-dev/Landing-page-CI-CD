@@ -13,7 +13,7 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'club-uleam-service'
+      - 'landing-page-club-uleam'
       - '--image=gcr.io/$PROJECT_ID/club-uleam'
       - '--region=us-central1'
       - '--allow-unauthenticated'
