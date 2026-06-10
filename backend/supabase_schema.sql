@@ -8,6 +8,25 @@ create table if not exists public.jugadores (
 
 alter table public.jugadores enable row level security;
 
+drop policy if exists "Permitir lectura publica de jugadores" on public.jugadores;
+drop policy if exists "Permitir escritura desde API del backend" on public.jugadores;
+drop policy if exists "Permitir eliminacion desde API del backend" on public.jugadores;
+
+create policy "Permitir lectura publica de jugadores"
+on public.jugadores
+for select
+using (true);
+
+create policy "Permitir escritura desde API del backend"
+on public.jugadores
+for insert
+with check (true);
+
+create policy "Permitir eliminacion desde API del backend"
+on public.jugadores
+for delete
+using (true);
+
 insert into public.jugadores (nombre, posicion, dorsal)
 values
   ('Juan Perez', 'Portero', 1),

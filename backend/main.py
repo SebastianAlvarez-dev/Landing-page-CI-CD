@@ -3,6 +3,7 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from postgrest.exceptions import APIError
 from supabase import Client, create_client
 
 
@@ -40,6 +41,13 @@ def obtener_cliente_supabase() -> Client:
     return create_client(supabase_url, supabase_key)
 
 
+def manejar_error_supabase(error: APIError):
+    raise HTTPException(
+        status_code=500,
+        detail=f"Error consultando Supabase: {error.message}",
+    )
+
+
 @app.get("/")
 def inicio():
     return {
@@ -52,12 +60,16 @@ def inicio():
 @app.get("/jugadores")
 def obtener_jugadores():
     supabase = obtener_cliente_supabase()
-    respuesta = (
-        supabase.table("jugadores")
-        .select("nombre,posicion,dorsal")
-        .order("dorsal")
-        .execute()
-    )
+    try:
+        respuesta = (
+            supabase.table("jugadores")
+            .select("nombre,posicion,dorsal")
+            .order("dorsal")
+            .execute()
+        )
+    except APIError as error:
+        manejar_error_supabase(error)
+
     return respuesta.data
 
 
@@ -65,12 +77,15 @@ def obtener_jugadores():
 def crear_jugador(jugador: Jugador):
     supabase = obtener_cliente_supabase()
 
-    jugador_existente = (
-        supabase.table("jugadores")
-        .select("dorsal")
-        .eq("dorsal", jugador.dorsal)
-        .execute()
-    )
+    try:
+        jugador_existente = (
+            supabase.table("jugadores")
+            .select("dorsal")
+            .eq("dorsal", jugador.dorsal)
+            .execute()
+        )
+    except APIError as error:
+        manejar_error_supabase(error)
 
     if jugador_existente.data:
         raise HTTPException(
@@ -78,11 +93,14 @@ def crear_jugador(jugador: Jugador):
             detail=f"Ya existe un jugador con el dorsal {jugador.dorsal}.",
         )
 
-    respuesta = (
-        supabase.table("jugadores")
-        .insert(jugador.model_dump())
-        .execute()
-    )
+    try:
+        respuesta = (
+            supabase.table("jugadores")
+            .insert(jugador.model_dump())
+            .execute()
+        )
+    except APIError as error:
+        manejar_error_supabase(error)
 
     return {
         "mensaje": "Jugador agregado correctamente.",
@@ -95,17 +113,23 @@ def crear_jugador(jugador: Jugador):
 def eliminar_jugador(dorsal: int):
     supabase = obtener_cliente_supabase()
 
-    jugador_existente = (
-        supabase.table("jugadores")
-        .select("dorsal")
-        .eq("dorsal", dorsal)
-        .execute()
-    )
+    try:
+        jugador_existente = (
+            supabase.table("jugadores")
+            .select("dorsal")
+            .eq("dorsal", dorsal)
+            .execute()
+        )
+    except APIError as error:
+        manejar_error_supabase(error)
 
     if not jugador_existente.data:
         raise HTTPException(status_code=404, detail="Jugador no encontrado.")
 
-    supabase.table("jugadores").delete().eq("dorsal", dorsal).execute()
+    try:
+        supabase.table("jugadores").delete().eq("dorsal", dorsal).execute()
+    except APIError as error:
+        manejar_error_supabase(error)
 
     return {
         "mensaje": f"Jugador con dorsal {dorsal} eliminado correctamente.",
