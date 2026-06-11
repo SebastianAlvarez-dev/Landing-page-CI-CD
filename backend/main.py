@@ -54,7 +54,7 @@ def manejar_error_supabase(error: Exception):
 @app.get("/")
 def inicio():
     return {
-        "mensaje": "Backend FastAPI del Club ULEAM activo con Supabase.",
+        "mensaje": "Backend FastAPI del Club BARCELONA activo con Supabase.",
         "estado": "ok",
         "base_datos": "supabase",
         "supabase_configurado": bool(os.getenv("SUPABASE_URL") and os.getenv("SUPABASE_KEY")),
